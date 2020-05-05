@@ -36,7 +36,7 @@
 
     <Spinner
         android:id="@+id/spinnerPrioritaet"
-        android:layout_width="227dp"
+        android:layout_width="267dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
@@ -77,9 +77,9 @@
         android:id="@+id/textInputLayoutTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -88,13 +88,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/textfeldTitel"
-            android:inputType="text"/>
+            android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutKategorie"
-        android:layout_width="227dp"
+        android:layout_width="267dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         app:errorEnabled="true"
@@ -107,7 +107,7 @@
             android:layout_height="wrap_content"
             android:editable="false"
             android:focusable="false"
-            android:hint="@string/kategorieWaehlen" />
+            android:hint="@string/kategorieWaehlen" /> />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -117,10 +117,9 @@
         app:errorEnabled="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.466"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinnerPrioritaet"
-        app:layout_constraintVertical_bias="0.242">
+        app:layout_constraintVertical_bias="0.13">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/inputEditTextDatum"

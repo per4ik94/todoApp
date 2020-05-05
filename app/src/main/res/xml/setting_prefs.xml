@@ -5,7 +5,15 @@
 
     </PreferenceCategory>
     <EditTextPreference
-        android:defaultValue="false"
+        android:defaultValue="20"
+        android:inputType="numberDecimal"
+        android:maxLength="2"
         android:key="size"
-        android:title="@string/text_size" />
+        android:title="@string/text_size"/>
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="prio_visibility"
+        android:title="@string/prioritaetAusblenden"
+        android:summaryOff="Sichtbar"
+        android:summaryOn="Unsichtbar"/>
 </PreferenceScreen>

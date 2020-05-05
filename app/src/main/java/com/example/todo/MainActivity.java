@@ -2,9 +2,8 @@ package com.example.todo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -25,43 +24,40 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
-import static androidx.preference.PreferenceManager.getDefaultSharedPreferences;
-
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-    public static final String PREFS_FILE = "itemTextSize";
-    public static final String MY_KEY = "size";
+/**
+ * @author Sergej Cerkasin
+ * @version TodoApp 2020/05/01
+ */
+public class MainActivity extends AppCompatActivity {
+    public static final String TAG = "MainActivity";
     ItemAdapter itemAdapter;
     FloatingActionButton fabAdd;
     SwipeMenuListView listViewTodoItem;
-    float textsize;
     TextView time;
     DatabaseHelper db;
     ArrayList<ToDoItem> listItem;
 
+    /**
+     * Bei Start wird die Activity aufgebaut, die ListView mit Elementen gefuellt
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupSharedPreferences();
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_FILE, MODE_PRIVATE);
-        textsize = sharedPreferences.getFloat(MY_KEY, 20);
-        db=new DatabaseHelper(this);
+        setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+        db = new DatabaseHelper(this);
 
         fabAdd = findViewById(R.id.addToDO);
         listViewTodoItem = findViewById(R.id.listView);
         time = findViewById(R.id.time);
 
-        //----------------------------------------------neuer adapter------------------//
         listItem = new ArrayList<>();
         populateTodoListView();
-
-        //--------------------------------------------------------------------------//
-
-
-        //itemAdapter.setTextSizes(textsize);
+        swipeListItems();
 
         listViewTodoItem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @SuppressLint("ResourceType")
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), Detail_Activity.class);
@@ -74,12 +70,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 }
                 dataTodoID.close();
 
-
                 intent.putExtra("titel", item.getTitel());
                 intent.putExtra("id", itemID);
                 intent.putExtra("layout", "bearbeiten");
                 startActivity(intent);
-
             }
         });
         fabAdd.setOnClickListener(new View.OnClickListener() {
@@ -90,21 +84,19 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         });
 
+    }
 
+    /**
+     * Erstellt eine Einstellung zum Swipen der List Elemente sowie die Loesch Funktion.
+     */
+    private void swipeListItems() {
         SwipeMenuCreator creator = new SwipeMenuCreator() {
             @Override
             public void create(SwipeMenu menu) {
-                // create "delete" item
-                SwipeMenuItem deleteItem = new SwipeMenuItem(
-                        getApplicationContext());
-                // set item background
-                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
-                        0x3F, 0x25)));
-                // set item width
+                SwipeMenuItem deleteItem = new SwipeMenuItem(getApplicationContext());
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25)));
                 deleteItem.setWidth(170);
-                // set a icon
                 deleteItem.setIcon(R.drawable.ic_delete);
-                // add to menu
                 menu.addMenuItem(deleteItem);
             }
         };
@@ -116,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 switch (index) {
                     case 0:
                         ToDoItem item = listItem.get(position);
+
                         Cursor dataTodoID = db.getToDoID(item.getTitel());
                         int itemID = -1;
                         while (dataTodoID.moveToNext()) {
@@ -126,29 +119,37 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         listItem.remove(item);
                         listViewTodoItem.setAdapter(itemAdapter);
                         db.deleteToDo(itemID);
-                        db.deleteToDoCategories(itemID);
+                        db.deleteTodoKategorie(itemID);
                         break;
                 }
-                // false : close the menu; true : not close the menu
                 return false;
             }
         });
     }
 
+    /**
+     * Liest Daten aus der Datenbank und setzt es in eine ListView.
+     */
     private void populateTodoListView() {
-        Cursor cursor = db.getTodo();
-        if (cursor.getCount() == 0){
-            Toast.makeText(this," NO DATA", Toast.LENGTH_LONG).show();
-        }else{
-            while (cursor.moveToNext()){
-                listItem.add(new ToDoItem(cursor.getString(1), cursor.getString(2), cursor.getString(3),cursor.getInt(4)));
+        Cursor todoCursor = db.getTodo();
+        if (todoCursor.getCount() == 0) {
+            Toast.makeText(this, "Du hast noch keine TODO erstellt", Toast.LENGTH_LONG).show();
+        } else {
+            while (todoCursor.moveToNext()) {
+                listItem.add(new ToDoItem(todoCursor.getString(1), todoCursor.getString(2), todoCursor.getString(3), todoCursor.getInt(4)));
             }
+            todoCursor.close();
             itemAdapter = new ItemAdapter(MainActivity.this, listItem);
             listViewTodoItem.setAdapter(itemAdapter);
         }
     }
 
-
+    /**
+     * Erstellt ein Menue aus der angegebenen XML Datei zum aufklappen.
+     *
+     * @param menu Menue.
+     * @return true - wenn aufgebaut.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -156,6 +157,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         return true;
     }
 
+    /**
+     * Startet Einstellungen Activity.
+     *
+     * @param item Menu Element.
+     * @return Boolean - false - in MainActivity bleiben - true - Einstellungen oeffnen.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.itemSettings) {
@@ -164,35 +171,4 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private void setupSharedPreferences() {
-        SharedPreferences sharedPreferences = getDefaultSharedPreferences(this);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_FILE, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putFloat(MY_KEY, textsize);
-        editor.apply();
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-        if (key.equals(MY_KEY)) {
-            textsize = Float.parseFloat(sharedPreferences.getString(MY_KEY, "20.0"));
-            itemAdapter.setTextSizes(textsize);
-            onResume();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
-    }
-
 }

@@ -103,7 +103,7 @@
     <TextView
         android:id="@+id/textView4"
         android:layout_width="40dp"
-        android:layout_height="17dp"
+        android:layout_height="15dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:text="@string/days_left1"

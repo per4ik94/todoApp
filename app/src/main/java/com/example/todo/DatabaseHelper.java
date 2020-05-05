@@ -8,13 +8,16 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-
+/**
+ * @author Sergej Cerkasin
+ * @version TodoApp 2020/05/01
+ */
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TAG = "DatabseHelper";
     public static final String DATABASE_NAME = "todo.db";
     private static final int DATABASE_VERSION = 1;
 
-    //--------------------------TOD_O table -------------------------//
+    //--------------------------TODO_TABELLE-------------------------//
     public static final String TABLE_NAME_TODO = "todo";
     public static final String ID_FIELD_NAME_TODO = "id";
     public static final String ID_FIELD_TYPE_TODO = "INTEGER PRIMARY KEY AUTOINCREMENT";
@@ -27,7 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String PRIORITY_ID_FIELD_NAME_TODO = "priority_id";
     public static final String PRIORITY_ID_FIELD_TYPE_TODO = "INTEGER";
 
-    //--------------------------TODO_CATEGORY table -------------------------//
+    //--------------------------TODO_KATEGORIE TABELLE-------------------------//
     public static final String TABLE_NAME_TODO_CATEGORY = "todo_category";
     public static final String TODO_ID_FIELD_NAME_TODO_CATEGORY = "todo_id";
     public static final String TODO_ID_FIELD_TYPE_TODO_CATEGORY = "INTEGER";
@@ -35,20 +38,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String CATEGORY_ID_FIELD_TYPE_TODO_CATEGORY = "INTEGER";
 
 
-    //--------------------------CATEGORY table -------------------------//
+    //--------------------------KATEGORIE TABELLE -------------------------//
     public static final String TABLE_NAME_CATEGORY = "category";
     public static final String ID_FIELD_NAME_CATEGORY = "id";
     public static final String ID_FIELD_TYPE_CATEGORY = "INTEGER PRIMARY KEY AUTOINCREMENT";
     public static final String CATEGORY_FIELD_NAME_CATEGORY = "name";
     public static final String CATEGORY_FIELD_TYPE_CATEGORY = "TEXT";
 
-    //--------------------------PRIORITY table -------------------------//
+    //--------------------------PRIORITAET TABELLE -------------------------//
     public static final String TABLE_NAME_PRIORITY = "priority";
     public static final String ID_FIELD_NAME_PRIORITY = "id";
     public static final String ID_FIELD_TYPE_PRIORITY = "INTEGER PRIMARY KEY AUTOINCREMENT";
     public static final String FIELD_NAME_PRIORITY = "name";
     public static final String FIELD_TYPE_PRIORITY = "TEXT";
 
+    //-----------------------------TABELLE ERSTELLEN -----------------------//
     private static final String TABLE_CREATE_TODO = "CREATE TABLE " + TABLE_NAME_TODO + "("
             + ID_FIELD_NAME_TODO + " " + ID_FIELD_TYPE_TODO + ", "
             + DATE_FIELD_NAME_TODO + " " + DATE_FIELD_TYPE_TODO + ", "
@@ -68,10 +72,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + ID_FIELD_NAME_PRIORITY + " " + ID_FIELD_TYPE_PRIORITY + ", "
             + FIELD_NAME_PRIORITY + " " + FIELD_TYPE_PRIORITY + ")";
 
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * @param db
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(TABLE_CREATE_TODO);
@@ -80,6 +88,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(TABLE_CREATE_TODO_CATEGORY);
     }
 
+    /**
+     * Alte Tabellen Loeschen und neue erstellen.
+     *
+     * @param db
+     * @param oldVersion
+     * @param newVersion
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_TODO);
@@ -88,17 +103,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean addData(String _date, String _title, String _description, int _prioID) {
+    /**
+     * Ablegen der Todo_ Daten in eine Tabelle.
+     *
+     * @param _titel        Todo_ Titel.
+     * @param _beschreibung Todo_ Beschreibung.
+     * @param _datum        Todo_ Datum.
+     * @param _prioID       Todo_ Prioritaet ID.
+     * @return
+     */
+    public boolean addData(String _titel, String _beschreibung, String _datum, int _prioID) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DATE_FIELD_NAME_TODO, _date);
-        contentValues.put(TITLE_FIELD_NAME_TODO, _title);
-        contentValues.put(DESCR_FIELD_NAME_TODO, _description);
+        contentValues.put(DATE_FIELD_NAME_TODO, _datum);
+        contentValues.put(TITLE_FIELD_NAME_TODO, _titel);
+        contentValues.put(DESCR_FIELD_NAME_TODO, _beschreibung);
         contentValues.put(PRIORITY_ID_FIELD_NAME_TODO, _prioID);
         long result = db.insert(TABLE_NAME_TODO, null, contentValues);
         return result != -1;
     }
 
+    /**
+     * Waehlt alle Todo_ Elemente aus.
+     *
+     * @return Datenbank Eintraege.
+     */
     public Cursor getTodo() {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_NAME_TODO;
@@ -106,6 +135,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    /**
+     * Waehlt ein bestimmtes Todo_ aus.
+     *
+     * @param id von Todo_ Element.
+     * @return Datenbank Eintrag.
+     */
     public Cursor getToDo(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_NAME_TODO + " WHERE " + ID_FIELD_NAME_PRIORITY + " = '" + id + "'";
@@ -113,253 +148,239 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-
     /**
-     * Selects id from the entry with specific title
+     * Waehlt die ID eines bestimmten Todo_.
      *
-     * @param title - title string
-     * @return - database entries
+     * @param _titel Todo_ Titel.
+     * @return Datenbank Eintrag.
      */
-    public Cursor getToDoID(String title) {
+    public Cursor getToDoID(String _titel) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + ID_FIELD_NAME_TODO + " FROM " + TABLE_NAME_TODO + " WHERE " + TITLE_FIELD_NAME_TODO + " = '" + title + "'";
+        String query = "SELECT " + ID_FIELD_NAME_TODO + " FROM " + TABLE_NAME_TODO + " WHERE " + TITLE_FIELD_NAME_TODO + " = '" + _titel + "'";
         return db.rawQuery(query, null);
     }
 
     /**
-     * Updates todo in the database.
+     * Aktualisiert die Daten einer bestimmten Todo_.
      *
-     * @param newTitle - new title string
-     * @param id       - todo id
+     * @param _neuerTitel       Neuer Titel.
+     * @param _neueBeschreibung Neue Beschreibung.
+     * @param _neuesDatum       Neues Datum.
+     * @param _neuePrio         Neue Prioritaet.
+     * @param _todoID           Todo_ID die Aktualisiert wird.
      */
-    public void updateToDo(String newTitle, String newDescription, String newDatetime, int newPriority, int id) {
+    public void updateToDo(String _neuerTitel, String _neueBeschreibung, String _neuesDatum, int _neuePrio, int _todoID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_NAME_TODO + " SET " + TITLE_FIELD_NAME_TODO + " = '" + newTitle + "', " + DESCR_FIELD_NAME_TODO + " = '" + newDescription + "', " + DATE_FIELD_NAME_TODO + " = '" + newDatetime + "', " + PRIORITY_ID_FIELD_NAME_TODO + " = '" + newPriority + "' WHERE " + ID_FIELD_NAME_TODO + " = '" + id + "'";
-        Log.d(TAG, "updateToDo: query: " + query);
-        Log.d(TAG, "updateToDo: Updating entry with id: " + id + " to " + newTitle);
+        String query = "UPDATE " + TABLE_NAME_TODO + " SET " + TITLE_FIELD_NAME_TODO + " = '" + _neuerTitel + "', " + DESCR_FIELD_NAME_TODO + " = '" + _neueBeschreibung + "', " + DATE_FIELD_NAME_TODO + " = '" + _neuesDatum + "', " + PRIORITY_ID_FIELD_NAME_TODO + " = '" + _neuePrio + "' WHERE " + ID_FIELD_NAME_TODO + " = '" + _todoID + "'";
+        Log.d(TAG, "updateToDo: " + _todoID + " ID wird umbenannt zu " + _neuerTitel);
         db.execSQL(query);
     }
 
     /**
-     * Deletes todo with specific id from database.
+     * Loescht ein bestimmtes Todo_.
      *
-     * @param id - todo id
+     * @param id Todo_ ID.
      */
     public void deleteToDo(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "DELETE FROM " + TABLE_NAME_TODO + " WHERE " + ID_FIELD_NAME_TODO + " = '" + id + "'";
-        Log.d(TAG, "deleteToDo: query: " + query);
-        Log.d(TAG, "deleteToDo: Deleting entry with id: " + id + " from database");
+        Log.d(TAG, "deleteToDo: TODO ID: " + id + " gelöscht");
         db.execSQL(query);
     }
 
 
-    // ------------------------ "priority" table methods ----------------//
-
     /**
-     * Adds new priority entry to the database.
+     * Legt Prioritaet mit dem eingegebenem Namen in der Datenbank ab.
      *
-     * @param title - title string
-     * @return - the row ID of the newly inserted row, or -1 if an error occurred
+     * @param _prio Prioritaet Name.
+     * @return ID der neuen Reihe oder -1 bei fehler.
      */
-    public boolean addPriority(String title) {
+    public boolean addPrioritaet(String _prio) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(FIELD_NAME_PRIORITY, title);
-
+        contentValues.put(FIELD_NAME_PRIORITY, _prio);
         long result = db.insert(TABLE_NAME_PRIORITY, null, contentValues);
-
         return result != -1;
     }
 
     /**
-     * Updates priority entry with specific id in the database.
+     * Aktualisiert den Prioritaet Namen einer bestimmten ID.
      *
-     * @param newTitle - new title string
-     * @param id       - priority id
-     * @param oldTitle - old title string
+     * @param _neuePrioritaetTitel Neuer Prioritaet Name.
+     * @param _prioID              Prioritaet ID.
+     * @param _oldPrioritaetTitel  Alter Prioritaet Name.
      */
-    public void updatePriority(String newTitle, int id, String oldTitle) {
+    public void updatePrioritaet(String _neuePrioritaetTitel, int _prioID, String _oldPrioritaetTitel) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_NAME_PRIORITY + " SET " + FIELD_NAME_PRIORITY + " = '" + newTitle + "' WHERE " + ID_FIELD_NAME_PRIORITY + " = '" + id + "' AND " + FIELD_NAME_PRIORITY + " = '" + oldTitle + "'";
-        Log.d(TAG, "updatePriority: query: " + query);
-        Log.d(TAG, "updatePriority: Updating " + oldTitle + " to " + newTitle);
+        String query = "UPDATE " + TABLE_NAME_PRIORITY + " SET " + FIELD_NAME_PRIORITY + " = '" + _neuePrioritaetTitel + "' WHERE " + ID_FIELD_NAME_PRIORITY + " = '" + _prioID + "' AND " + FIELD_NAME_PRIORITY + " = '" + _oldPrioritaetTitel + "'";
+        Log.d(TAG, "updatePrioritaet: von" + _oldPrioritaetTitel + " zu " + _neuePrioritaetTitel);
         db.execSQL(query);
     }
 
     /**
-     * Deletes priority entry with specific id from the database.
+     * Loescht eine Prioritaet mit einer bestimmten ID.
      *
-     * @param id    - priority id
-     * @param title - title string
+     * @param _prioID         Prioritaet ID.
+     * @param _prioritaetName Prioritaet Name.
      */
-    public void deletePriority(int id, String title) throws SQLiteException {
+    public void deletePrioritaet(int _prioID, String _prioritaetName) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "DELETE FROM " + TABLE_NAME_PRIORITY + " WHERE " + ID_FIELD_NAME_PRIORITY + " = '" + id + "' AND " + FIELD_NAME_PRIORITY + " = '" + title + "'";
-        Log.d(TAG, "deletePriority: query: " + query);
-        Log.d(TAG, "deletePriority: Deleting " + title + " from database");
+        String query = "DELETE FROM " + TABLE_NAME_PRIORITY + " WHERE " + ID_FIELD_NAME_PRIORITY + " = '" + _prioID + "' AND " + FIELD_NAME_PRIORITY + " = '" + _prioritaetName + "'";
+        Log.d(TAG, "deletePrioritaet: " + _prioritaetName + " Geloescht");
         db.execSQL(query);
     }
 
     /**
-     * Selects all priority database entries.
+     * Waehlt alle Prioritaet Eintraege aus.
      *
-     * @return - priority database entries
+     * @return Datenbank Eintraege.
      */
-    public Cursor getPriority() {
+    public Cursor getPrioritaet() {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_NAME_PRIORITY;
         return db.rawQuery(query, null);
     }
 
-    public Cursor getPriorityID(String title) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + ID_FIELD_NAME_PRIORITY + " FROM " + TABLE_NAME_PRIORITY + " WHERE " + FIELD_NAME_PRIORITY + " = '" + title + "'";
-
-        String selectQuery = "SELECT * FROM " + TABLE_NAME_PRIORITY + " WHERE " + ID_FIELD_TYPE_PRIORITY + " = '" + title + "'";
-        Log.d("oppp", selectQuery);
-        return db.rawQuery(query, null);
-
-    }
-
     /**
-     * Selects priority database entry with specific id.
+     * Waehlt eine Prioritaet mit einem bestimmten Namen.
      *
-     * @param id - priority id
-     * @return - priority database entry
+     * @param _prioritaetName Prioritaet Name.
+     * @return Datenbank Eintrag.
      */
-    public Cursor getPriority(int id) {
+    public Cursor getPrioritaetID(String _prioritaetName) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_NAME_PRIORITY + " WHERE " + ID_FIELD_NAME_PRIORITY + " = '" + id + "'";
+        String query = "SELECT " + ID_FIELD_NAME_PRIORITY + " FROM " + TABLE_NAME_PRIORITY + " WHERE " + FIELD_NAME_PRIORITY + " = '" + _prioritaetName + "'";
+        //Log.d(TAG, "getPrioritaetID: " + query);
         return db.rawQuery(query, null);
     }
 
-
-    // ------------------------ "category" table methods ----------------//
+    /**
+     * Waehlt eine Prioritaet mit einer bestimmten ID.
+     *
+     * @param _prioID Prioritaet ID.
+     * @return Datenbank Eintrag.
+     */
+    public Cursor getPrioritaet(int _prioID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_NAME_PRIORITY + " WHERE " + ID_FIELD_NAME_PRIORITY + " = '" + _prioID + "'";
+        //Log.d(TAG, "getPrioritaet: " + query);
+        return db.rawQuery(query, null);
+    }
 
     /**
-     * @param title - title string
-     * @return
+     * Legt einen Eintrag in der TodoKategorie Tabelle ab.
+     *
+     * @param _todoID      Todo_ ID
+     * @param _kategorieID Kategorie ID.
+     * @return neu erzeugte Reihe oder -1 bei Fehler.
      */
-    public boolean addCategory(String title) {
+    public boolean addTodoKategorie(int _todoID, int _kategorieID) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(CATEGORY_FIELD_NAME_CATEGORY, title);
-
-        long result = db.insert(TABLE_NAME_CATEGORY, null, contentValues);
-
+        contentValues.put(TODO_ID_FIELD_NAME_TODO_CATEGORY, _todoID);
+        contentValues.put(CATEGORY_ID_FIELD_NAME_TODO_CATEGORY, _kategorieID);
+        long result = db.insert(TABLE_NAME_TODO_CATEGORY, null, contentValues);
         return result != -1;
     }
 
     /**
-     * @param newTitle - new title string
-     * @param id       - category id
-     * @param oldTitle - old title string
+     * Waehlt einen Eintrag mit einer bestimmten ID.
+     *
+     * @param _todoID Todo_ ID.
+     * @return Datenbank Eintrag.
      */
-    public void updateCategory(String newTitle, int id, String oldTitle) {
+    public Cursor getTodoKategorie(int _todoID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_NAME_TODO_CATEGORY + " WHERE " + TODO_ID_FIELD_NAME_TODO_CATEGORY + " = '" + _todoID + "'";
+        return db.rawQuery(query, null);
+    }
+
+    /**
+     * Loescht einen TodoKategorie Eintrag mit einer bestimmten ID.
+     *
+     * @param todoID Todo_ ID.
+     */
+    public void deleteTodoKategorie(int todoID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_NAME_CATEGORY + " SET " + CATEGORY_FIELD_NAME_CATEGORY + " = '" + newTitle + "' WHERE " + ID_FIELD_NAME_CATEGORY + " = '" + id + "' AND " + CATEGORY_FIELD_NAME_CATEGORY + " = '" + oldTitle + "'";
-        Log.d(TAG, "updatePriority: query: " + query);
-        Log.d(TAG, "updatePriority: Updating " + oldTitle + " to " + newTitle);
+        String query = "DELETE FROM " + TABLE_NAME_TODO_CATEGORY + " WHERE " + TODO_ID_FIELD_NAME_TODO_CATEGORY + " = '" + todoID + "'";
+        Log.d(TAG, "deleteTodoKategorie: Kategorie mit " + todoID + " Geloescht");
         db.execSQL(query);
     }
 
     /**
-     * Deletes category with specific id from database.
+     * Legt eine Kategorie in der Datenbank ab.
      *
-     * @param id    - category id
-     * @param title - title string
+     * @param _kategorieName Kategorie Name.
+     * @return Neue Reihe mit der Kategorie oder -1 bei Fehler.
      */
-    public void deleteCategory(int id, String title) throws SQLiteException {
+    public boolean addKategorie(String _kategorieName) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "DELETE FROM " + TABLE_NAME_CATEGORY + " WHERE " + ID_FIELD_NAME_CATEGORY + " = '" + id + "' AND " + CATEGORY_FIELD_NAME_CATEGORY + " = '" + title + "'";
-        Log.d(TAG, "deletePriority: query: " + query);
-        Log.d(TAG, "deletePriority: Deleting " + title + " from database");
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CATEGORY_FIELD_NAME_CATEGORY, _kategorieName);
+        long result = db.insert(TABLE_NAME_CATEGORY, null, contentValues);
+        return result != -1;
+    }
+
+    /**
+     * Aktualisiert eine bestehende Kategorie.
+     *
+     * @param _neueKategorie Neuer Kategorie Name.
+     * @param _kategorieID   Kategorie ID.
+     * @param _alteKategorie Alter Kategorie Name.
+     */
+    public void updateKategorie(String _neueKategorie, int _kategorieID, String _alteKategorie) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_NAME_CATEGORY + " SET " + CATEGORY_FIELD_NAME_CATEGORY + " = '" + _neueKategorie + "' WHERE " + ID_FIELD_NAME_CATEGORY + " = '" + _kategorieID + "' AND " + CATEGORY_FIELD_NAME_CATEGORY + " = '" + _alteKategorie + "'";
+        Log.d(TAG, "updateKategorie: von " + _alteKategorie + " zu " + _neueKategorie);
         db.execSQL(query);
     }
 
     /**
-     * Selects all category entries from database.
+     * Loescht eine Kategorie mit einer bestimmten ID.
      *
-     * @return - selected database entries
+     * @param _kategorieID   Kategorie ID.
+     * @param _kategorieName Kategorie Name.
+     * @throws SQLiteException
      */
-    public Cursor getCategory() {
+    public void deleteKategorie(int _kategorieID, String _kategorieName) throws SQLiteException {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "DELETE FROM " + TABLE_NAME_CATEGORY + " WHERE " + ID_FIELD_NAME_CATEGORY + " = '" + _kategorieID + "' AND " + CATEGORY_FIELD_NAME_CATEGORY + " = '" + _kategorieName + "'";
+        Log.d(TAG, "deleteKategorie: " + _kategorieName + " Geloescht");
+        db.execSQL(query);
+    }
+
+    /**
+     * Waehlt alle Kategorien aus.
+     *
+     * @return alle Kategorie Eintraege.
+     */
+    public Cursor getKategorie() {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_NAME_CATEGORY;
         return db.rawQuery(query, null);
     }
 
     /**
-     * Selects category entry with specific id from database.
+     * Waehlt eine Kategorie mit einer bestimmten ID.
      *
-     * @param id - category id
-     * @return - selected category
+     * @param _kategorieID Kategorie ID.
+     * @return Kategorie Datenbank Eintrag.
      */
-    public Cursor getCategory(int id) {
+    public Cursor getKategorie(int _kategorieID) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_NAME_CATEGORY + " WHERE " + ID_FIELD_NAME_CATEGORY + " = '" + id + "'";
+        String query = "SELECT * FROM " + TABLE_NAME_CATEGORY + " WHERE " + ID_FIELD_NAME_CATEGORY + " = '" + _kategorieID + "'";
         return db.rawQuery(query, null);
     }
 
     /**
-     * Selects category id from the entry with specific title from database.
+     * Waehlt eine Kategorie mit einem bestimmten Namen.
      *
-     * @param title - title string
-     * @return - selected category id
+     * @param _kategorieName Kategorie Name.
+     * @return Kategorie Datenbank Eintrag.
      */
-    public Cursor getCategoryID(String title) {
+    public Cursor getKategorieID(String _kategorieName) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + ID_FIELD_NAME_PRIORITY + " FROM " + TABLE_NAME_CATEGORY + " WHERE " + FIELD_NAME_PRIORITY + " = '" + title + "'";
+        String query = "SELECT " + ID_FIELD_NAME_PRIORITY + " FROM " + TABLE_NAME_CATEGORY + " WHERE " + FIELD_NAME_PRIORITY + " = '" + _kategorieName + "'";
         return db.rawQuery(query, null);
     }
-
-
-    // ------------------------ "ToDoCategory" table methods ----------------//
-
-    /**
-     * Adds a new entry into the database.
-     *
-     * @param todoID     - id of the todo entry
-     * @param categoryID - id of the category entry
-     * @return - the row ID of the newly inserted row, or -1 if an error occurred
-     */
-    public boolean addTodoCategory(int todoID, int categoryID) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(TODO_ID_FIELD_NAME_TODO_CATEGORY, todoID);
-        contentValues.put(CATEGORY_ID_FIELD_NAME_TODO_CATEGORY, categoryID);
-
-        long result = db.insert(TABLE_NAME_TODO_CATEGORY, null, contentValues);
-
-        return result != -1;
-    }
-
-
-    /**
-     * Selects entries with specific todo id.
-     *
-     * @param todoID - id of the todo entry
-     * @return - selected entries
-     */
-    public Cursor getToDoCategory(int todoID) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_NAME_TODO_CATEGORY + " WHERE " + TODO_ID_FIELD_NAME_TODO_CATEGORY + " = '" + todoID + "'";
-        return db.rawQuery(query, null);
-    }
-
-    /**
-     * Removes entries with specific todo id.
-     *
-     * @param todoID - id of the todo entry
-     */
-    public void deleteToDoCategories(int todoID) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "DELETE FROM " + TABLE_NAME_TODO_CATEGORY + " WHERE " + TODO_ID_FIELD_NAME_TODO_CATEGORY + " = '" + todoID + "'";
-        Log.d(TAG, "deleteToDoCategories: query: " + query);
-        Log.d(TAG, "deleteToDoCategories: Removing category connection to the todo " + todoID + " from database");
-        db.execSQL(query);
-    }
-
-
-
 }

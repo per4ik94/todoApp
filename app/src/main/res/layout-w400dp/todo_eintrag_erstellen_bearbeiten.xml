@@ -9,17 +9,18 @@
     <include
         android:id="@+id/include"
         layout="@layout/todo_eintrag_form"
-        android:layout_width="321dp"
-        android:layout_height="361dp"
+        android:layout_width="412dp"
+        android:layout_height="473dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
         android:id="@+id/erstellen_button_layout"
         layout="@layout/todo_erstellen_button"
-        android:layout_width="320dp"
-        android:layout_height="115dp"
+        android:layout_width="410dp"
+        android:layout_height="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,12 +30,12 @@
     <include
         android:id="@+id/bearbeiten_button_layout"
         layout="@layout/todo_bearbeiten_buttons"
-        android:layout_width="320dp"
-        android:layout_height="115dp"
+        android:layout_width="410dp"
+        android:layout_height="80dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/erstellen_button_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include"
         app:layout_constraintVertical_bias="1.0" />
